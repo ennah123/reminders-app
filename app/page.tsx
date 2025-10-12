@@ -11,9 +11,10 @@ export default function Home() {
     await fetch('/api/reminders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, dueTime: time }),
+      body: JSON.stringify({ title, dueTime: new Date(time).toISOString()  }),
     })
     alert('Reminder added!')
+    console.log(new Date(time).toString())
   }
 
   return (
