@@ -1,8 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
+import dbConnect from "@/lib/mongoose";
 import cron from 'node-cron'
 import nodemailer from 'nodemailer'
 import { generateSimpleReminderEmail } from '@/app/templates/emailTemplates'
-const prisma = new PrismaClient()
+import Reminder from '@/models/Reminder'
+import mongoose from "mongoose";
 
 if (!process.env.EMAIL_AUTH_USER || !process.env.EMAIL_AUTH_PASS) {
   console.error('❌ Missing email credentials in environment variables')
@@ -11,7 +15,7 @@ if (!process.env.EMAIL_AUTH_USER || !process.env.EMAIL_AUTH_PASS) {
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
-  host: 'smtp.ethereal.email',
+  host: 'smtp.gmail.com',
   port: 587,
   auth: {
     user: process.env.EMAIL_AUTH_USER,
@@ -30,14 +34,14 @@ transporter.verify((error) => {
 // Run every minute
 cron.schedule('* * * * *', async () => {
   try {
+    await dbConnect()
+    
     const now = new Date()
-    console.log(`🕒 Checking reminders at ${now.toISOString()}`)
+    console.log(`🕒 Checking reminders at ${now.toString()}`)
 
-    const dueReminders = await prisma.reminder.findMany({
-      where: { 
-        dueTime: { lte: now }, 
-        notified: false 
-      },
+    const dueReminders = await Reminder.find({
+      dueTime: { $lte: now },
+      notified: false
     })
 
     for (const reminder of dueReminders) {
@@ -58,13 +62,15 @@ cron.schedule('* * * * *', async () => {
 
         console.log(`Email sent for: ${reminder.title}`)
         
-        await prisma.reminder.update({
-          where: { id: reminder.id },
-          data: { notified: true },
-        })
+        await Reminder.findByIdAndUpdate(
+          reminder._id,
+          { notified: true }
+        )
+
+        console.log(`Marked as notified: ${reminder.title}`)
 
       } catch (emailError) {
-        console.error(`Failed to process reminder ${reminder.id}:`, emailError)
+        console.error(`Failed to process reminder ${reminder._id}:`, emailError)
       }
     }
 
@@ -73,4 +79,10 @@ cron.schedule('* * * * *', async () => {
   }
 })
 
-console.log('Cron job running every minute...')
+process.on('SIGINT', async () => {
+  console.log('🛑 Shutting down cron job...')
+  await mongoose.connection.close()
+  process.exit(0)
+})
+
+console.log('✅ Cron job running every minute...')
