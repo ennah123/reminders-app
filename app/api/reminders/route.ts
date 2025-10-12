@@ -1,28 +1,36 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/mongoose';
+import Reminder from '@/models/Reminder';
 
 export async function GET() {
   try {
-    const reminders = await prisma.reminder.findMany({
-      orderBy: { dueTime: 'asc' }
-    })
+    await dbConnect();
 
-    return NextResponse.json(reminders)
+    const reminders = await Reminder.find().sort({ dueTime: 1 });
+    return NextResponse.json(reminders);
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Failed to fetch reminders' }, { status: 500 })
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to fetch reminders' }, { status: 500 });
   }
 }
 
-export async function POST(req: Request){
-    const {title, dueTime} = await req.json()
-    if (!title || !dueTime) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+export async function POST(req: Request) {
+  try {
+    await dbConnect();
 
-    const reminder = await prisma.reminder.create({
-        data: { title, dueTime: new Date(dueTime) }
-    })
+    const { title, dueTime } = await req.json();
+    if (!title || !dueTime) {
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+    }
 
-    return NextResponse.json(reminder)
+    const reminder = await Reminder.create({
+      title,
+      dueTime,
+    });
+
+    return NextResponse.json(reminder);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to create reminder' }, { status: 500 });
+  }
 }
