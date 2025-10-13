@@ -1,9 +1,7 @@
 'use client'
-
-import { Header } from '@/components/Header'
-import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import Header from '@/components/Header'
 
 export default function Home() {
   const [title, setTitle] = useState('')
@@ -13,6 +11,7 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    const loadingToast = toast.loading('Creating reminder...')
     
     try {
       const response = await fetch('/api/reminders', {
@@ -22,14 +21,17 @@ export default function Home() {
       })
 
       if (response.ok) {
+        toast.dismiss(loadingToast)
         toast.success('Reminder created successfully!')
         setTitle('')
         setTime('')
       } else {
+        toast.dismiss(loadingToast)
         toast.error('Failed to create reminder. Please try again.')
       }
     } catch (error) {
       console.log(error)
+      toast.dismiss(loadingToast)
       toast.error('An error occurred. Please try again.')
     } finally {
       setLoading(false)
