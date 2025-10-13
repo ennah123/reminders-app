@@ -1,40 +1,45 @@
 'use client'
 
+import { Header } from '@/components/Header'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function Home() {
   const [title, setTitle] = useState('')
   const [time, setTime] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await fetch('/api/reminders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, dueTime: new Date(time).toISOString()  }),
-    })
-    alert('Reminder added!')
-    console.log(new Date(time).toString())
+    setLoading(true)
+    
+    try {
+      const response = await fetch('/api/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, dueTime: new Date(time).toISOString() }),
+      })
+
+      if (response.ok) {
+        toast.success('Reminder created successfully!')
+        setTitle('')
+        setTime('')
+      } else {
+        toast.error('Failed to create reminder. Please try again.')
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-900 rounded-full mr-3"></div>
-              <h1 className="text-2xl font-light text-gray-900">Reminders</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-900 font-medium text-sm">Dashboard</a>
-              <a href="#" className="text-gray-500 hover:text-gray-900 text-sm">Calendar</a>
-              <a href="#" className="text-gray-500 hover:text-gray-900 text-sm">Settings</a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header/>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -120,9 +125,10 @@ export default function Home() {
                   <div className="pt-4">
                     <button
                       type="submit"
-                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 font-medium text-sm tracking-wide transition-colors duration-200"
+                      disabled={loading}
+                      className={`w-full ${loading ? 'bg-gray-600' : 'bg-gray-900 hover:bg-gray-800'} text-white py-3 px-4 font-medium text-sm tracking-wide transition-colors duration-200`}
                     >
-                      Create Reminder
+                      {loading ? 'Creating ...' : 'Create Reminder'}
                     </button>
                   </div>
                 </form>
