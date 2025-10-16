@@ -56,14 +56,14 @@ const Header = async () => {
                       <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
                   )}
-                  <div className="hidden md:flex flex-col text-right">
+                  {/* <div className="hidden md:flex flex-col text-start">
                     <span className="text-sm font-medium text-slate-800">
                       {session.user?.name}
                     </span>
                     <span className="text-xs text-slate-500">
                       {session.user?.email}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="border-l border-slate-200 pl-4">
                   <SignOut />
