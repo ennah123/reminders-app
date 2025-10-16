@@ -17,20 +17,20 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     await dbConnect();
-
-    const { title, dueTime } = await req.json();
-    if (!title || !dueTime) {
+    const { title, dueTime, user_email } = await req.json();
+    if (!title || !dueTime || !user_email) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
     const reminder = await Reminder.create({
       title,
       dueTime,
+      user_email
     });
 
     return NextResponse.json(reminder);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to create reminder' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create reminder' + error}, { status: 500 });
   }
 }
