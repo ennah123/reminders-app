@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Reminders App",
+  title: "Reminders",
   description: "Manage your reminders efficiently",
 };
 
