@@ -54,7 +54,7 @@ cron.schedule('* * * * *', async () => {
         
         await transporter.sendMail({
           from: `"Reminders App" <${process.env.EMAIL_AUTH_USER}>`,
-          to: '123ennah@gmail.com',
+          to: reminder.user_email,
           subject: `Reminder: ${reminder.title}`,
           text: `⏰ Your reminder "${reminder.title}" is due now!`,
           html: htmlContent
