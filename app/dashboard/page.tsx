@@ -13,7 +13,7 @@ type Data = {
     createdAt: String,
 }
 
-export default function Home({session, data}:{session: any, data}) {
+export default function Home({session, data}:{session: any, data: Data[]}) {
   const router = useRouter()
   useEffect(()=>{ if (!session) router.push('/auth/signin') },[session])
     
