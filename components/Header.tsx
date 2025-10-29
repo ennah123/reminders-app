@@ -33,12 +33,12 @@ const Header = async () => {
             >
               Dashboard
             </Link>
-            <a 
-              href="#" 
+            <Link 
+              href="/calander" 
               className="text-slate-500 hover:text-slate-700 text-sm transition-colors duration-200"
             >
               Calendar
-            </a>
+            </Link>
             
             {/* User Section */}
             {session ? (
