@@ -20,7 +20,7 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
   if (!session) return <div className="dark:bg-slate-900 dark:text-white min-h-screen flex items-center justify-center">you have to login first</div> 
   
   const [title, setTitle] = useState('')
-  const remindersArray = Array.isArray(data) ? data : []
+  const [reminders, setReminders] = useState<Data[]>(Array.isArray(data) ? data : [])
   const [time, setTime] = useState('')
   const [loading, setLoading] = useState(false)
   const [statics, setStatics] = useState({
@@ -30,10 +30,16 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
     total: data?.length ?? 0
   })
 
+  useEffect(() => {
+    setReminders(Array.isArray(data) ? data : [])
+    console.log('updated')
+    
+  }, [data])
+
   const getStatics = () => {
-    const pending = remindersArray?.filter((reminder:Data) => reminder.notified === false)
-    const completed = remindersArray?.filter((reminder:Data) => reminder.notified === true)
-    const today = remindersArray?.filter((reminder: Data) => {
+    const pending = reminders?.filter((reminder:Data) => reminder.notified === false)
+    const completed = reminders?.filter((reminder:Data) => reminder.notified === true)
+    const today = reminders?.filter((reminder: Data) => {
       if (!reminder.dueTime) return [];
 
       const due = new Date(reminder.dueTime);
@@ -45,9 +51,15 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
         due.getFullYear() === now.getFullYear()
       );
     });
-    setStatics({ ...statics, pending: pending.length, completed: completed.length, today: today.length })
+     setStatics({ 
+      pending: pending.length, 
+      completed: completed.length, 
+      today: today.length,
+      total: reminders.length 
+    })
   }
-  useEffect(() => { getStatics() }, [])
+  useEffect(() => { getStatics() }, [reminders])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,6 +78,7 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
         toast.success('Reminder created successfully!')
         setTitle('')
         setTime('')
+        router.refresh()
       } else {
         toast.dismiss(loadingToast)
         toast.error('Failed to create reminder. Please try again.')
@@ -134,7 +147,7 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
               <div className="space-y-4">
 
 
-             {remindersArray?.slice(0, 2).map((reminder: any, index: number) => {
+             {reminders?.slice(0, 2).map((reminder: any, index: number) => {
               const dueDate = new Date(reminder.dueTime)
               const now = new Date()
               let label = ''
