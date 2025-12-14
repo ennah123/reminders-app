@@ -196,7 +196,7 @@ export default function CalendarPage({ session, data }: { session: any, data: Da
                                                 className={`p-3 rounded-lg border transition-colors duration-200 ${
                                                     reminder.notified
                                                         ? 'bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800'
-                                                        : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+                                                        : 'bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800'
                                                 }`}
                                             >
                                                 <div className="flex items-start justify-between">
@@ -236,7 +236,7 @@ export default function CalendarPage({ session, data }: { session: any, data: Da
                     {/* Main Calendar Area - Full width on mobile */}
                     <div className="lg:col-span-3">
                         {/* Calendar Header */}
-                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6 mb-6 sm:mb-8 transition-colors duration-200">
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-8 mb-6 sm:mb-8 transition-colors duration-200">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
                                     <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl text-slate-800 dark:text-white mb-1 sm:mb-2 font-medium">
@@ -286,120 +286,127 @@ export default function CalendarPage({ session, data }: { session: any, data: Da
                                 ))}
                             </div>
 
-{/* Calendar Days - Modern with Rounded Borders */}
-<div className="grid grid-cols-7 gap-1 sm:gap-2">
-    {generateCalendar().map((day, index) => {
-        const dayReminders = getRemindersForDate(day.date)
-        const isTodayDate = isToday(day.date)
-        const isSelectedDate = isSelected(day.date)
-        const hasReminders = dayReminders.length > 0
-        const isOtherMonth = !day.isCurrentMonth
-        
-        return (
-            <button
-                key={index}
-                onClick={() => setSelectedDate(day.date)}
-                className={`
-                    relative aspect-square min-h-[52px] sm:min-h-[64px]
-                    flex flex-col items-center justify-start p-2
-                    rounded-xl border transition-all duration-200
-                    ${isSelectedDate
-                        ? 'bg-white dark:bg-slate-800 border-amber-300 dark:border-amber-700 shadow-sm'
-                        : isTodayDate
-                        ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600'
-                        : 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500'
-                    }
-                    ${isOtherMonth ? 'opacity-40' : ''}
-                    focus:outline-none focus:ring-2 focus:ring-slate-400/30
-                    group
-                `}
-            >
-                {/* Date Number */}
-                <div className="w-full flex justify-between items-start mb-1">
-                    <span className={`
-                        text-base font-semibold
-                        ${isSelectedDate 
-                            ? 'text-amber-600 dark:text-amber-400' 
-                            : isTodayDate
-                            ? 'text-slate-900 dark:text-white'
-                            : 'text-slate-700 dark:text-slate-300'
-                        }
-                    `}>
-                        {day.date.getDate()}
-                    </span>
-                </div>
-                
-                {/* Reminder Indicator */}
-                {hasReminders && !isOtherMonth && (
-                    <div className="flex-1 flex items-center justify-center w-full">
-                        <div className="relative">
-                            {/* Bell icon with circular background */}
-                            <div className={`
-                                w-10 h-10 rounded-full flex items-center justify-center
-                                transition-all duration-300
-                                ${isSelectedDate 
-                                    ? 'bg-amber-50 dark:bg-amber-900/20'
-                                    : 'bg-slate-50 dark:bg-slate-700/30 group-hover:bg-slate-100 dark:group-hover:bg-slate-700/50'
-                                }
-                            `}>
-                                {/* Outline Bell Icon */}
-                                <svg 
-                                    className={`
-                                        w-5 h-5 transition-colors
-                                        ${isSelectedDate 
-                                            ? 'text-amber-600 dark:text-amber-400'
-                                            : 'text-slate-600 dark:text-slate-400'
-                                        }
-                                    `} 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    strokeWidth="1.5"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" 
-                                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-                                    />
-                                </svg>
-                                
-                                {/* Count badge */}
-                                <span className={`
-                                    absolute -top-1 -right-1
-                                    min-w-[20px] h-5 px-1.5 text-xs font-semibold
-                                    rounded-full flex items-center justify-center
-                                    border-2 border-white dark:border-slate-800
-                                    ${isSelectedDate 
-                                        ? 'bg-amber-500 text-white'
-                                        : 'bg-slate-600 text-white dark:bg-slate-500'
-                                    }
-                                `}>
-                                    {dayReminders.length}
-                                </span>
+                            {/* Calendar Days - Modern with Rounded Borders */}
+                            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                                {generateCalendar().map((day, index) => {
+                                    const dayReminders = getRemindersForDate(day.date)
+                                    const isTodayDate = isToday(day.date)
+                                    const isSelectedDate = isSelected(day.date)
+                                    const hasReminders = dayReminders.length > 0
+                                    const isOtherMonth = !day.isCurrentMonth
+                                    
+                                    return (
+                                        <button
+                                            key={index}
+                                            onClick={() => setSelectedDate(day.date)}
+                                            className={`
+                                                relative aspect-square min-h-[52px] sm:min-h-[64px]
+                                                flex flex-col items-center justify-start p-2
+                                                rounded-xl border transition-all duration-200
+                                                ${isSelectedDate
+                                                    ? 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 shadow-sm'
+                                                    : isTodayDate
+                                                    ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600'
+                                                    : 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500'
+                                                }
+                                                ${isOtherMonth ? 'opacity-40' : ''}
+                                                focus:outline-none focus:ring-2 focus:ring-slate-400/30
+                                                group
+                                            `}
+                                        >
+                                            {/* Date Number */}
+                                            <div className="w-full flex justify-between items-start mb-1">
+                                                <span
+                                                    className={`
+                                                        absolute top-2 left-2
+                                                        text-xs font-semibold
+
+                                                        ${isSelectedDate 
+                                                        ? 'text-slate-600 dark:text-slate-400' 
+                                                        : isTodayDate
+                                                        ? 'text-slate-900 dark:text-white'
+                                                        : 'text-slate-700 dark:text-slate-300'
+                                                        }
+                                                    `}
+                                                    >
+                                                    {day.date.getDate()}
+                                                </span>
+                                            </div>
+                                            
+                                            {/* Reminder Indicator */}
+                                        {hasReminders && !isOtherMonth && (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div
+                                                    className={`
+                                                        relative w-10 h-10 rounded-full flex items-center justify-center
+                                                        transition-all duration-300
+                                                        ${isSelectedDate 
+                                                        ? 'bg-slate-50 dark:bg-slate-900/20'
+                                                        : 'bg-slate-50 dark:bg-slate-700/30 group-hover:bg-slate-100 dark:group-hover:bg-slate-700/50'
+                                                        }
+                                                    `}
+                                                    >
+                                                    <svg 
+                                                        className={`
+                                                        w-5 h-5 transition-colors
+                                                        ${isSelectedDate 
+                                                            ? 'text-slate-600 dark:text-slate-400'
+                                                            : 'text-slate-600 dark:text-slate-400'
+                                                        }
+                                                        `} 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        strokeWidth="1.5"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                                                        />
+                                                    </svg>
+
+                                                    {/* Count badge */}
+                                                    <span
+                                                        className={`
+                                                        absolute -top-1 -right-1
+                                                        min-w-[20px] h-5 px-1.5 text-xs font-semibold
+                                                        rounded-full flex items-center justify-center
+                                                        border-2 border-white dark:border-slate-800
+                                                        ${isSelectedDate 
+                                                            ? 'bg-slate-500 text-white'
+                                                            : 'bg-slate-600 text-white dark:bg-slate-500'
+                                                        }
+                                                        `}
+                                                    >
+                                                        {dayReminders.length}
+                                                    </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            
+                                            {/* Empty state for current month */}
+                                            {!hasReminders && !isOtherMonth && (
+                                                <div className="flex-1 flex items-center justify-center opacity-30">
+                                                    <svg 
+                                                        className="w-4 h-4 text-slate-400 dark:text-slate-600" 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        strokeWidth="1.5"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" 
+                                                            d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            
+                                        </button>
+                                    )
+                                })}
                             </div>
-                        </div>
-                    </div>
-                )}
-                
-                {/* Empty state for current month */}
-                {!hasReminders && !isOtherMonth && (
-                    <div className="flex-1 flex items-center justify-center opacity-30">
-                        <svg 
-                            className="w-4 h-4 text-slate-400 dark:text-slate-600" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="1.5"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" 
-                                d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-                            />
-                        </svg>
-                    </div>
-                )}
-                
-            </button>
-        )
-    })}
-</div>
                         </div>
 
                         {/* Mobile Selected Date Panel - Only show on mobile */}
