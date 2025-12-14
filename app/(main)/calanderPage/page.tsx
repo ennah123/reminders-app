@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import Header from '@/components/Header'
 import { useRouter } from 'next/navigation'
 
 type Data = {
@@ -25,6 +24,7 @@ export default function CalendarPage({ session, data }: { session: any, data: Da
     useEffect(() => {
         setReminders(Array.isArray(data) ? data : [])
     }, [data])
+    
     // Get reminders for a specific date
     const getRemindersForDate = (date: Date) => {
         return reminders.filter((reminder: Data) => {
@@ -131,8 +131,8 @@ export default function CalendarPage({ session, data }: { session: any, data: Da
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-200">
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {/* Main Content px-6 py-12*/}
+            <div className="max-w-7xl mx-auto px-6 py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
                     {/* Sidebar - Hidden on mobile, shown on lg screens */}
                     <div className="hidden lg:block lg:col-span-1 space-y-6">
@@ -286,109 +286,120 @@ export default function CalendarPage({ session, data }: { session: any, data: Da
                                 ))}
                             </div>
 
-                            {/* Calendar Days - Optimized for mobile */}
-                            <div className="grid grid-cols-7 gap-1 sm:gap-2">
-                                {generateCalendar().map((day, index) => {
-                                    const dayReminders = getRemindersForDate(day.date)
-                                    const isTodayDate = isToday(day.date)
-                                    const isSelectedDate = isSelected(day.date)
-                                    
-                                    return (
-                                        <div
-                                            key={index}
-                                            onClick={() => setSelectedDate(day.date)}
-                                            className={`
-                                                aspect-square min-h-[44px] sm:min-h-[60px] lg:min-h-[80px] xl:min-h-[100px] 
-                                                p-1 sm:p-2 rounded-lg sm:rounded-xl border-2 transition-all duration-200 cursor-pointer
-                                                flex flex-col items-center justify-start
-                                                ${isTodayDate 
-                                                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' 
-                                                    : isSelectedDate
-                                                    ? 'border-slate-600 dark:border-slate-400 bg-slate-50 dark:bg-slate-700'
-                                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                                                }
-                                                ${!day.isCurrentMonth ? 'opacity-40' : ''}
-                                            `}
-                                        >
-                                            {/* Date Number */}
-                                            <div className="flex justify-between items-center w-full mb-1">
-                                                <span className={`
-                                                    text-xs sm:text-sm font-medium
-                                                    ${isTodayDate 
-                                                        ? 'text-amber-600 dark:text-amber-400' 
-                                                        : isSelectedDate
-                                                        ? 'text-slate-800 dark:text-white'
-                                                        : 'text-slate-600 dark:text-slate-400'
-                                                    }
-                                                    ${!day.isCurrentMonth ? 'text-slate-400 dark:text-slate-600' : ''}
-                                                `}>
-                                                    {day.date.getDate()}
-                                                </span>
-                                                
-                                                {/* Reminder Count Badge - Always visible */}
-                                                {dayReminders.length > 0 && (
-                                                    <span className={`
-                                                        w-4 h-4 sm:w-5 sm:h-5 text-[10px] sm:text-xs flex items-center justify-center rounded-full font-medium
-                                                        ${isTodayDate 
-                                                            ? 'bg-amber-500 text-white' 
-                                                            : isSelectedDate
-                                                            ? 'bg-slate-600 dark:bg-slate-400 text-white'
-                                                            : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400'
-                                                        }
-                                                    `}>
-                                                        {dayReminders.length}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            
-                                            {/* Reminder Dots - Only show on larger screens */}
-                                            <div className="hidden sm:block w-full mt-auto space-y-1">
-                                                {dayReminders.slice(0, 3).map((reminder, reminderIndex) => (
-                                                    <div
-                                                        key={reminderIndex}
-                                                        className={`
-                                                            text-xs p-1 rounded truncate
-                                                            ${reminder.notified
-                                                                ? 'bg-slate-100 dark:bg-slate-900/30 text-slate-800 dark:text-slate-300'
-                                                                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300'
-                                                            }
-                                                        `}
-                                                    >
-                                                        {reminder.title}
-                                                    </div>
-                                                ))}
-                                                {dayReminders.length > 3 && (
-                                                    <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
-                                                        +{dayReminders.length - 3} more
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Mobile: Show dot indicators instead of text */}
-                                            <div className="sm:hidden flex flex-wrap justify-center gap-1 mt-auto">
-                                                {dayReminders.slice(0, 4).map((reminder, reminderIndex) => (
-                                                    <div
-                                                        key={reminderIndex}
-                                                        className={`
-                                                            w-1.5 h-1.5 rounded-full
-                                                            ${reminder.notified
-                                                                ? 'bg-slate-500'
-                                                                : 'bg-amber-500'
-                                                            }
-                                                        `}
-                                                        title={reminder.title}
-                                                    />
-                                                ))}
-                                                {dayReminders.length > 4 && (
-                                                    <div className="text-[8px] text-slate-500 dark:text-slate-400">
-                                                        +{dayReminders.length - 4}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
+{/* Calendar Days - Modern with Rounded Borders */}
+<div className="grid grid-cols-7 gap-1 sm:gap-2">
+    {generateCalendar().map((day, index) => {
+        const dayReminders = getRemindersForDate(day.date)
+        const isTodayDate = isToday(day.date)
+        const isSelectedDate = isSelected(day.date)
+        const hasReminders = dayReminders.length > 0
+        const isOtherMonth = !day.isCurrentMonth
+        
+        return (
+            <button
+                key={index}
+                onClick={() => setSelectedDate(day.date)}
+                className={`
+                    relative aspect-square min-h-[52px] sm:min-h-[64px]
+                    flex flex-col items-center justify-start p-2
+                    rounded-xl border transition-all duration-200
+                    ${isSelectedDate
+                        ? 'bg-white dark:bg-slate-800 border-amber-300 dark:border-amber-700 shadow-sm'
+                        : isTodayDate
+                        ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600'
+                        : 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500'
+                    }
+                    ${isOtherMonth ? 'opacity-40' : ''}
+                    focus:outline-none focus:ring-2 focus:ring-slate-400/30
+                    group
+                `}
+            >
+                {/* Date Number */}
+                <div className="w-full flex justify-between items-start mb-1">
+                    <span className={`
+                        text-base font-semibold
+                        ${isSelectedDate 
+                            ? 'text-amber-600 dark:text-amber-400' 
+                            : isTodayDate
+                            ? 'text-slate-900 dark:text-white'
+                            : 'text-slate-700 dark:text-slate-300'
+                        }
+                    `}>
+                        {day.date.getDate()}
+                    </span>
+                </div>
+                
+                {/* Reminder Indicator */}
+                {hasReminders && !isOtherMonth && (
+                    <div className="flex-1 flex items-center justify-center w-full">
+                        <div className="relative">
+                            {/* Bell icon with circular background */}
+                            <div className={`
+                                w-10 h-10 rounded-full flex items-center justify-center
+                                transition-all duration-300
+                                ${isSelectedDate 
+                                    ? 'bg-amber-50 dark:bg-amber-900/20'
+                                    : 'bg-slate-50 dark:bg-slate-700/30 group-hover:bg-slate-100 dark:group-hover:bg-slate-700/50'
+                                }
+                            `}>
+                                {/* Outline Bell Icon */}
+                                <svg 
+                                    className={`
+                                        w-5 h-5 transition-colors
+                                        ${isSelectedDate 
+                                            ? 'text-amber-600 dark:text-amber-400'
+                                            : 'text-slate-600 dark:text-slate-400'
+                                        }
+                                    `} 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    strokeWidth="1.5"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" 
+                                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                                    />
+                                </svg>
+                                
+                                {/* Count badge */}
+                                <span className={`
+                                    absolute -top-1 -right-1
+                                    min-w-[20px] h-5 px-1.5 text-xs font-semibold
+                                    rounded-full flex items-center justify-center
+                                    border-2 border-white dark:border-slate-800
+                                    ${isSelectedDate 
+                                        ? 'bg-amber-500 text-white'
+                                        : 'bg-slate-600 text-white dark:bg-slate-500'
+                                    }
+                                `}>
+                                    {dayReminders.length}
+                                </span>
                             </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Empty state for current month */}
+                {!hasReminders && !isOtherMonth && (
+                    <div className="flex-1 flex items-center justify-center opacity-30">
+                        <svg 
+                            className="w-4 h-4 text-slate-400 dark:text-slate-600" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" 
+                                d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                            />
+                        </svg>
+                    </div>
+                )}
+                
+            </button>
+        )
+    })}
+</div>
                         </div>
 
                         {/* Mobile Selected Date Panel - Only show on mobile */}
