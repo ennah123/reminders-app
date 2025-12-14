@@ -14,13 +14,11 @@ const Header = async () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo and Brand */}
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center mr-3">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3">
+              <Image src={'/logo.svg'} alt='' width={40} height={1} />
             </div>
             <div>
-              <h1 className="font-serif text-xl text-slate-800 font-medium">Reminder</h1>
+              <h1 className="font-serif text-xl text-slate-800 font-medium">Reminders</h1>
               <p className="text-xs text-slate-500 hidden sm:block">Stay organized, stay productive</p>
             </div>
           </div>
