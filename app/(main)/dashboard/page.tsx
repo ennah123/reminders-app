@@ -29,6 +29,8 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
     today: 0,
     total: data?.length ?? 0
   })
+  const date = new Date();
+  const Hour = date.getHours();
 
   useEffect(() => {
     setReminders(Array.isArray(data) ? data : [])
@@ -218,7 +220,7 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-8 transition-colors duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="font-serif text-3xl text-slate-800 dark:text-white mb-2 font-medium">Good Morning, John</h1>
+                  <h1 className="font-serif text-3xl text-slate-800 dark:text-white mb-2 font-medium">Good {Hour < 12 ? 'Morning' : Hour < 20 ?'Afternoon' : 'Evening'}, {session?.user?.name.split(" ")[0]}</h1>
                   <p className="text-slate-600 dark:text-slate-400">Here's what's happening with your reminders today</p>
                 </div>
                 <div className="text-right">
