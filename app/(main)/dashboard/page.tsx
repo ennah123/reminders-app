@@ -1,8 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import Header from '@/components/Header'
 import { useRouter } from 'next/navigation'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+import { CalendarIcon, ChevronDownIcon, Clock } from 'lucide-react'
+import { format } from 'date-fns'
 
 type Data = {
     _id: String,
@@ -15,13 +22,11 @@ type Data = {
 
 export default function Home({session, data}:{session: any, data: Data[]}) {
   const router = useRouter()
-  useEffect(()=>{ if (!session) router.push('/auth/signin') },[session])
-    
-  if (!session) return <div className="dark:bg-slate-900 dark:text-white min-h-screen flex items-center justify-center">you have to login first</div> 
-  
   const [title, setTitle] = useState('')
   const [reminders, setReminders] = useState<Data[]>(Array.isArray(data) ? data : [])
-  const [time, setTime] = useState('')
+  const [date, setDate] = useState<Date | undefined>(undefined)
+  const [time, setTime] = useState('10:30')
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [statics, setStatics] = useState({
     completed: 0,
@@ -29,13 +34,14 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
     today: 0,
     total: data?.length ?? 0
   })
-  const date = new Date();
-  const Hour = date.getHours();
+  const currentHour = new Date().getHours();
+
+  useEffect(()=>{ if (!session) router.push('/auth/signin') },[session])
+  
+  if (!session) return <div className="dark:bg-slate-900 dark:text-white min-h-screen flex items-center justify-center">you have to login first</div> 
 
   useEffect(() => {
     setReminders(Array.isArray(data) ? data : [])
-    console.log('updated')
-    
   }, [data])
 
   const getStatics = () => {
@@ -60,11 +66,27 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
       total: reminders.length 
     })
   }
+  
   useEffect(() => { getStatics() }, [reminders])
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!date) {
+      toast.error('Please select a date')
+      return
+    }
+
+    if (!time) {
+      toast.error('Please select a time')
+      return
+    }
+
+    // Combine date and time
+    const [hours, minutes] = time.split(':').map(Number)
+    const selectedDateTime = new Date(date)
+    selectedDateTime.setHours(hours, minutes, 0, 0)
+
     setLoading(true)
     const loadingToast = toast.loading('Creating reminder...')
     
@@ -72,14 +94,19 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
       const response = await fetch('/api/reminders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, dueTime: new Date(time).toISOString(), user_email: session?.user?.email }),
+        body: JSON.stringify({ 
+          title, 
+          dueTime: selectedDateTime.toISOString(), 
+          user_email: session?.user?.email 
+        }),
       })
 
       if (response.ok) {
         toast.dismiss(loadingToast)
         toast.success('Reminder created successfully!')
         setTitle('')
-        setTime('')
+        setDate(undefined)
+        setTime('10:30')
         router.refresh()
       } else {
         toast.dismiss(loadingToast)
@@ -100,7 +127,7 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+          {/* Sidebar (unchanged) */}
           <div className="lg:col-span-1 space-y-6">
             {/* User Profile Card */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 text-center transition-colors duration-200">
@@ -147,69 +174,64 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors duration-200">
               <h2 className="font-serif text-xl text-slate-800 dark:text-white mb-6 font-medium">Recent</h2>
               <div className="space-y-4">
+                {reminders?.slice(0, 2).map((reminder: any, index: number) => {
+                  const dueDate = new Date(reminder.dueTime)
+                  const now = new Date()
+                  let label = ''
+                  let displayDate = ''
+                  
+                  if (
+                    dueDate.getDate() === now.getDate() &&
+                    dueDate.getMonth() === now.getMonth() &&
+                    dueDate.getFullYear() === now.getFullYear()
+                  ) {
+                    label = 'Today'
+                    displayDate = 'Today'
+                  } else {
+                    const tomorrow = new Date()
+                    tomorrow.setDate(now.getDate() + 1)
+                    if (
+                      dueDate.getDate() === tomorrow.getDate() &&
+                      dueDate.getMonth() === tomorrow.getMonth() &&
+                      dueDate.getFullYear() === tomorrow.getFullYear()
+                    ) {
+                      label = 'Tomorrow'
+                      displayDate = 'Tomorrow'
+                    } else {
+                      label = "Upcoming"
+                      displayDate = dueDate.toLocaleDateString()
+                    }
+                  }
 
+                  const timeString = dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
-             {reminders?.slice(0, 2).map((reminder: any, index: number) => {
-              const dueDate = new Date(reminder.dueTime)
-              const now = new Date()
-              let label = ''
-              let displayDate = ''
-              
-              if (
-                dueDate.getDate() === now.getDate() &&
-                dueDate.getMonth() === now.getMonth() &&
-                dueDate.getFullYear() === now.getFullYear()
-              ) {
-                label = 'Today'
-                displayDate = 'Today'
-              } else {
-                const tomorrow = new Date()
-                tomorrow.setDate(now.getDate() + 1)
-                if (
-                  dueDate.getDate() === tomorrow.getDate() &&
-                  dueDate.getMonth() === tomorrow.getMonth() &&
-                  dueDate.getFullYear() === tomorrow.getFullYear()
-                ) {
-                  label = 'Tomorrow'
-                  displayDate = 'Tomorrow'
-                } else {
-                  label = "Upcoming"
-                  displayDate = dueDate.toLocaleDateString()
-                }
-              }
-
-              const timeString = dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-              return (
-                <div
-                  key={reminder._id || index}
-                  className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-slate-800 dark:text-white">
-                      {reminder.title}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      {displayDate}, {timeString}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-2 py-1 text-xs text-white rounded-full font-medium ${
-                      label === 'Today'
-                        ? 'bg-amber-500'
-                        : label === 'Upcoming'
-                        ? 'bg-slate-500'
-                        : 'bg-slate-400'
-                    }`}
-                  >
-                    {label}
-                  </span>
-                </div>
-              )
-            })}
-
-
-
+                  return (
+                    <div
+                      key={reminder._id || index}
+                      className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-slate-800 dark:text-white">
+                          {reminder.title}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          {displayDate}, {timeString}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs text-white rounded-full font-medium ${
+                          label === 'Today'
+                            ? 'bg-amber-500'
+                            : label === 'Upcoming'
+                            ? 'bg-slate-500'
+                            : 'bg-slate-400'
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -220,7 +242,9 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-8 transition-colors duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="font-serif text-3xl text-slate-800 dark:text-white mb-2 font-medium">Good {Hour < 12 ? 'Morning' : Hour < 20 ?'Afternoon' : 'Evening'}, {session?.user?.name.split(" ")[0]}</h1>
+                  <h1 className="font-serif text-3xl text-slate-800 dark:text-white mb-2 font-medium">
+                    Good {currentHour < 12 ? 'Morning' : currentHour < 20 ?'Afternoon' : 'Evening'}, {session?.user?.name.split(" ")[0]}
+                  </h1>
                   <p className="text-slate-600 dark:text-slate-400">Here's what's happening with your reminders today</p>
                 </div>
                 <div className="text-right">
@@ -261,26 +285,67 @@ export default function Home({session, data}:{session: any, data: Data[]}) {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 font-serif">
-                        Date & Time
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={time}
-                        onChange={(e) => setTime(e.target.value)}
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-600 dark:focus:ring-slate-400 focus:border-slate-600 dark:focus:border-slate-400 focus:outline-none text-slate-900 dark:text-white transition-all duration-200"
-                        required
-                      />
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-3">
+                        <Label htmlFor="date-picker" className="px-1 text-slate-700 dark:text-slate-300 font-serif text-sm font-medium">
+                          Date & Time
+                        </Label>
+                        <div className="flex gap-4">
+                          {/* Date Picker */}
+                          <div className="flex-1">
+                            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  id="date-picker"
+                                  className={cn(
+                                    "w-full justify-between font-normal h-12 px-4 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-400 dark:hover:border-slate-500",
+                                    !date && "text-slate-400 dark:text-slate-500"
+                                  )}
+                                >
+                                  {date ? format(date, "PPP") : "Select date"}
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={date}
+                                  captionLayout="dropdown"
+                                  onSelect={(selectedDate) => {
+                                    setDate(selectedDate)
+                                    setDatePickerOpen(false)
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+
+                          {/* Time Picker */}
+                          <div className="flex-1">
+                            <div className="relative">
+                              <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+                              <Input
+                                type="time"
+                                id="time-picker"
+                                step="60"
+                                value={time}
+                                onChange={(e) => setTime(e.target.value)}
+                                className="w-full pl-10 h-12 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-slate-600 dark:focus:ring-slate-400 focus:border-slate-600 dark:focus:border-slate-400 focus:outline-none text-slate-900 dark:text-white [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="pt-4">
                       <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !date || !time}
                         className={`w-full flex items-center justify-center gap-3 ${
-                          loading 
-                            ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed' 
+                          loading || !date || !time
+                            ? 'bg-slate-800 dark:bg-slate-600 cursor-not-allowed' 
                             : 'bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600'
                         } text-white py-4 px-6 font-medium text-sm tracking-wide rounded-lg transition-all duration-200 shadow-sm hover:shadow-md`}
                       >
