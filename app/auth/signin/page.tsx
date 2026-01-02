@@ -105,7 +105,7 @@ export default function SignInPage() {
 
         {/* RIGHT SIDE - Full width on mobile, half width on lg screens */}
         <div className="flex h-full w-full items-center justify-center px-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 w-full max-w-md">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center mb-6">
                 <Image src={'/logo.svg'} alt="" width={70} height={1}/>
